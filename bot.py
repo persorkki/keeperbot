@@ -8,10 +8,15 @@ from dataclasses import dataclass
 class BotConfig:
     """Basic configuration for the bot"""
 
+    # bot secret token from the discord developer portal
     token: str
+
+    # server id, right click on a discord server and click "Copy Server ID"
     guild_id: int
 
+    # discord intents: https://discord.com/developers/docs/topics/gateway#gateway-intents
     intents: discord.Intents = discord.Intents.default()
+
     # how long the bot waits for a reconnection before going fully offline
     offline_delay: int = 15
 
@@ -24,8 +29,13 @@ class BotConfig:
 
 
 class Bot:
+    """This is the bot.
+    Takes in a BotConfig as a parameter, where token and guild_id needs to be set.
+    Creating a instance of this will automatically also run it.
+    """
+
     def __init__(self, config: BotConfig):
-        # important stuff
+        # important
         self.token = config.token
         self.guild_id = config.guild_id
 
@@ -35,12 +45,12 @@ class Bot:
         # client
         self.client = discord.Client(intents=config.intents)
 
+        # client needs to be set before calling these
         self.register_events()
         self.start()
 
     def register_events(self):
-        if not self.client:
-            raise TypeError("client is not set")
+        """registers functions to discord.py events, add them here"""
         self.client.event(self.on_ready)
 
     def start(self):
