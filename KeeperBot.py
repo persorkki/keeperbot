@@ -2,7 +2,14 @@
 Simple Discord bot that responds to specific webhooks (related to another project)
 
 Doesn't have many commands yet but this is a simple base to be built upon.
+config.py sets
+GUILD_ID - needed to sync commands to the specific guild
+BOT_TOKEN - discord bot token from the developer portal
+
+OFFLINE_DELAY - when the bot sees a "offline" webhook, it delays setting its presence to offline. this is that delay
 """
+# TODO: switch to real logging
+# TODO: make the async offline stuff more robust
 
 import discord
 import asyncio
@@ -13,7 +20,7 @@ import config
 token = config.BOT_TOKEN
 GUILD_ID = config.GUILD_ID
 GUILD = discord.Object(id=GUILD_ID)
-
+OFFLINE_DELAY = config.OFFLINE_DELAY
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -49,7 +56,7 @@ async def on_message(message: discord.Message):
 # if flag is set, go actually offline.
 async def go_offline():
     await client.change_presence(status=discord.Status.idle)
-    await asyncio.sleep(15)
+    await asyncio.sleep(OFFLINE_DELAY)
     if offline_flag.is_set():
         print(f"{datetime.datetime.now()} -- going offline --")
         await client.change_presence(status=discord.Status.offline)
@@ -73,11 +80,11 @@ async def go_online():
     )
 
 
-@tree.command(name="talkshit", description="talk shit", guild=GUILD)
-async def talk_shit(interaction: discord.Interaction, shit: str):
-    print(f"{datetime.datetime.now()} -- talking shit --")
-    await interaction.response.send_message("talking shit", ephemeral=True)
-    await interaction.channel.send(shit)  # type:ignore
+@tree.command(name="talk", description="talk ", guild=GUILD)
+async def talk_(interaction: discord.Interaction, msg: str):
+    print(f"{datetime.datetime.now()} -- talking  --")
+    await interaction.response.send_message("talking ", ephemeral=True)
+    await interaction.channel.send(msg)  # type:ignore
 
 
 @tree.command(name="title", description="changes the title", guild=GUILD)
