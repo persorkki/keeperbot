@@ -1,21 +1,31 @@
-from config import BOT_TOKEN
+import inspect
+import asyncio
+import logging
+from dataclasses import dataclass
 
 import discord
-from dataclasses import dataclass
+
+from config import BOT_TOKEN
+import bot_events
+from discord.ext import commands
 
 
 @dataclass
 class BotConfig:
     """Basic configuration for the bot"""
 
-    # bot secret token from the discord developer portal
+    # secret bot token from the discord developer portal
     token: str
 
     # server id, right click on a discord server and click "Copy Server ID"
     guild_id: int
 
+    # set the default intent, with message content
+    default_intent = discord.Intents.default()
+    default_intent.message_content = True
+
     # discord intents: https://discord.com/developers/docs/topics/gateway#gateway-intents
-    intents: discord.Intents = discord.Intents.default()
+    intents: discord.Intents = default_intent
 
     # how long the bot waits for a reconnection before going fully offline
     offline_delay: int = 15
@@ -42,27 +52,42 @@ class Bot:
         # customization
         self.offline_delay = config.offline_delay
 
-        # client
-        self.client = discord.Client(intents=config.intents)
+        # functionality
+        self.offline_delay_flag = asyncio.Event()
+
+        # discord py bot
+        self.bot = commands.Bot(command_prefix="!", intents=config.intents)
+
+        # commands
+        # self.tree = discord.app_commands.CommandTree(self.client)
 
         # client needs to be set before calling these
+        self.register_commands()
         self.register_events()
         self.start()
 
+    def register_commands(self):
+        pass
+
     def register_events(self):
         """registers functions to discord.py events, add them here"""
-        self.client.event(self.on_ready)
+
+        for fn_name, fn in inspect.getmembers(bot_events, inspect.isfunction):
+            if fn_name.startswith("on_"):
+                self.bot.event(fn)
+                print(f"{fn_name} in {fn}")
+
+        # self.bot.event(bot_events.on_ready)
+        # self.bot.event(bot_events.on_message)
 
     def start(self):
-        self.client.run(self.token)
+        self.bot.run(self.token)
 
-    # event
-    async def on_ready(self):
-        print("ready!")
+    async def go_online(self):
+        pass
 
-    # event
-    async def on_message(self, message: discord.Message):
-        print(f"{message.content}")
+    async def go_offline(self):
+        pass
 
 
 def run():
@@ -72,4 +97,8 @@ def run():
 
 
 if __name__ == "__main__":
+    # for fn_name, fn in inspect.getmembers(bot_events, inspect.isfunction):
+    #     if fn_name.startswith("on_"):
+    #         print(f"{fn_name} in {fn}")
+
     run()
