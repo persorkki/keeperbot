@@ -29,7 +29,10 @@ async def is_live_state_message(
     text: str, bot: commands.Bot, delayed_offline_flag: asyncio.Event
 ):
     if "live" in text:
+        # TODO: test if this works
+        delayed_offline_flag.clear()
         await bot.change_presence(status=nextcord.Status.online)
     elif "offline" in text:
         await bot.change_presence(status=nextcord.Status.idle)
+        delayed_offline_flag.set()
         await delayed_offline(bot, delayed_offline_flag)

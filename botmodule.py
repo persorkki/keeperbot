@@ -6,10 +6,13 @@ from bot_config import BotConfig
 from config import BOT_TOKEN, GUILD_ID
 
 import actions
+import asyncio
 
 # setup
 botconf = BotConfig(token=BOT_TOKEN, guild_id=GUILD_ID, offline_delay=9)
 bot = commands.Bot(intents=botconf.intents)
+
+delayed_offline_flag = asyncio.Event()
 
 
 # events
@@ -27,7 +30,9 @@ async def on_message_edit(before: nextcord.Message, after: nextcord.Message):
 @bot.event
 async def on_message(message: nextcord.Message):
     if message.webhook_id and message.embeds and message.embeds[0].description:
-        await actions.is_live_state_message(message.embeds[0].description, bot)
+        await actions.is_live_state_message(
+            message.embeds[0].description, bot, delayed_offline_flag
+        )
 
     if not message.author.bot:
         # TODO: maybe just load these dynamically from the actions module?
