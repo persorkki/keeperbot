@@ -1,5 +1,4 @@
 import nextcord
-from nextcord.abc import Messageable
 from nextcord.ext import commands
 
 from bot_config import BotConfig
@@ -31,7 +30,7 @@ async def on_message_edit(before: nextcord.Message, after: nextcord.Message):
 async def on_message(message: nextcord.Message):
     if message.webhook_id and message.embeds and message.embeds[0].description:
         await actions.is_live_state_message(
-            message.embeds[0].description, bot, delayed_offline_flag
+            message.embeds[0].description, bot, botconf, delayed_offline_flag
         )
 
     if not message.author.bot:
