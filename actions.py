@@ -1,6 +1,7 @@
 import random
 import asyncio
 import nextcord
+import re
 from nextcord.ext import commands
 
 from bot_config import BotConfig
@@ -15,10 +16,19 @@ kolchak_links = [
 ]
 
 
-async def check_kolchak(message):
-    if " kolchak " in message.content.lower():
-        rand = random.randrange(1, 6)
-        await message.channel.send(f"{kolchak_links[rand]}")
+def one_in_tenth():
+    chance: int = random.randrange(1, 11)
+
+
+async def check_japanese(message):
+    japanese_pattern = re.compile(r"[\u3040-\u309F\u30A0-\u30FF\uFF66-\uFF9F]+")
+    if japanese_pattern.search(message.content):
+        await message.channel.send("https://storage.googleapis.com/kryptayank/domo.mp4")
+
+
+async def do_kolchak(channel):
+    rand = random.randrange(0, 6)
+    await channel.send(f"{kolchak_links[rand]}")
 
 
 async def delayed_offline(

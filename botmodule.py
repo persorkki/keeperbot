@@ -20,9 +20,13 @@ async def on_ready():
     print("Ready to serve")
 
 
+def has_url_in_message(message: str) -> bool:
+    return "http" in message
+
+
 @bot.event
 async def on_message_edit(before: nextcord.Message, after: nextcord.Message):
-    if not before.author.bot:
+    if not before.author.bot and not has_url_in_message(before.content):
         await before.channel.send("(edited)")
 
 
@@ -34,26 +38,40 @@ async def on_message(message: nextcord.Message):
         )
 
     if not message.author.bot:
+        pass
         # TODO: maybe just load these dynamically from the actions module?
-        await actions.check_kolchak(message)
+        # TODO: make into slash command instead
+        # await actions.check_kolchak(message)
+        # await actions.check_japanese(message)
 
 
 # slash commands
-@bot.slash_command(description="test", guild_ids=[botconf.guild_id])
+@bot.slash_command(description="get a random kolchak gif", guild_ids=[botconf.guild_id])
+async def kolchak(interaction: nextcord.Interaction):
+    await interaction.send("kolchak!", ephemeral=True)
+    await actions.do_kolchak(interaction.channel)
+
+
+@bot.slash_command(description="chat as keeper", guild_ids=[botconf.guild_id])
 async def talk(
-    ctx: nextcord.Interaction,
-    arg: str = nextcord.SlashOption(name="message", description="message"),
+    interaction: nextcord.Interaction,
+    arg: str = nextcord.SlashOption(
+        name="message",
+        description="message",
+    ),
 ):
-    await ctx.send(arg)
+    await interaction.send(f'sent message "{arg}"', ephemeral=True)
+    # TODO: check these types later, this is supposed to be a Interaction but for some reason it doesnt recognize channel.send
+    await interaction.channel.send(arg)  # type: ignore
 
 
 @bot.slash_command(description="changes the status text", guild_ids=[botconf.guild_id])
 async def title(
-    ctx: nextcord.Interaction,
+    interaction: nextcord.Interaction,
     arg: str = nextcord.SlashOption(name="title", description="title"),
 ):
     await bot.change_presence(activity=nextcord.CustomActivity(name=arg))
-    await ctx.send(f"title changed to *{arg}*", ephemeral=True)
+    await interaction.send(f"title changed to *{arg}*", ephemeral=True)
 
 
 bot.run(botconf.token)
