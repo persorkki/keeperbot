@@ -4,6 +4,7 @@ from nextcord.ext import commands
 from bot_config import BotConfig
 from config import BOT_TOKEN, GUILD_ID
 
+import re
 import actions
 import asyncio
 
@@ -34,15 +35,15 @@ async def on_message_edit(before: nextcord.Message, after: nextcord.Message):
 async def on_message(message: nextcord.Message):
     if message.webhook_id and message.embeds and message.embeds[0].description:
         await actions.is_live_state_message(
-            message.embeds[0].description, bot, botconf, delayed_offline_flag
+            message.embeds[0].description,
+            bot,
+            botconf,
+            delayed_offline_flag,
+            message.channel,
         )
 
     if not message.author.bot:
-        pass
-        # TODO: maybe just load these dynamically from the actions module?
-        # TODO: make into slash command instead
-        # await actions.check_kolchak(message)
-        # await actions.check_japanese(message)
+        actions.check_emojis(message.content)
 
 
 # slash commands
