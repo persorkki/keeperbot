@@ -1,4 +1,3 @@
-import dataclasses
 import nextcord
 from dataclasses import dataclass
 
@@ -16,6 +15,7 @@ class BotConfig:
     # set the default intent, with message content
     default_intent = nextcord.Intents.default()
     default_intent.message_content = True
+    default_intent.presences = True
 
     # nextcord intents: https://nextcord.com/developers/docs/topics/gateway#gateway-intents
     intents: nextcord.Intents = default_intent

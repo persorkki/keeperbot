@@ -22,6 +22,13 @@ async def on_ready():
 
 
 def has_url_in_message(message: str) -> bool:
+    """
+    When you send a message that has a link in it to discord, discord checks if it can embed the
+    content of that link into the message (if it's a image/video or if perhaps spotify player embeds)
+    and if so, it edits the message. This sadly activates 'on_message_edit' event so we have to check for it.
+
+    Should be made more robust.
+    """
     return "http" in message
 
 

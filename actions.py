@@ -2,6 +2,7 @@ import random
 import asyncio
 import nextcord
 import re
+from nextcord.abc import MessageableChannel
 from nextcord.ext import commands
 
 from bot_config import BotConfig
@@ -21,6 +22,7 @@ emoji_count = {}
 
 def reset_emoji_count():
     global emoji_count
+    # emoji_count = config.
     emoji_count = {
         "<:kino:888494417114202122>": 0,
         "<:paulie:886673891819393055>": 0,
@@ -71,19 +73,22 @@ async def is_live_state_message(
     bot: commands.Bot,
     botconf: BotConfig,
     delayed_offline_flag: asyncio.Event,
-    channel,
+    channel: MessageableChannel,
 ):
     if "live" in text:
-        # TODO: test if this works
         delayed_offline_flag.clear()
         await bot.change_presence(status=nextcord.Status.online)
     elif "offline" in text:
         emojitext = ""
-        # {k: v for k, v in sorted(emoji_count.items(), key=lambda item: item[1])}
+        # TODO: this is kinda stupid, figure out how to do this properly
+        activity_text = bot.guilds[0].me.activity
+
+        if activity_text is not None:
+            emojitext = f"{activity_text} - "
+
         sorted_emoji_counts = sorted(
             emoji_count.items(), key=lambda item: item[1], reverse=True
         )
-
         for emoji, count in sorted_emoji_counts:
             if count > 0:
                 emojitext += f"{emoji} **{count}** "
